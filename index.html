@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Lacquer&display=swap" rel="stylesheet">
+    <script src="boid-engine.js" type="text/javascript"></script>
+    <title>Boidbugs - Boid System</title>
+</head>
+<body onload="init()">
+
+    <header>
+        <h1>Boidbugs</h1>       
+    </header>
+
+    <main>
+        <div id="controls">
+            <input type="checkbox">
+            <label class="label-name">Alignment</label>
+            
+            <input type="checkbox">
+            <label class="label-name">Cohesion</label>
+
+            <input type="checkbox">
+            <label class="label-name">Separation</label>
+        </div>
+
+        <svg id="boid-field">
+            <image href="img/bug-solid.svg" x="100" y="50" width="8px" height="8px"></image>
+        </svg>
+
+    </main>
+
+    <footer>
+        <p>Created by: <a href="https://github.com/acamann">Andy Camann</a></p>
+    </footer>
+
+</body>
+</html>
