@@ -6,6 +6,7 @@
 //   "normalized" "displacement" is the direction to move to get closer to it
 
 // start with 2d, then consider how to do 3d??
+// start in javascript to understand logic, then move to C#
 
 
 // VECTOR OBJECT
@@ -64,6 +65,8 @@ class BoidBug {
 let boidBugs = [];
 let boidField;
 const speedFactor = 0.001
+let fieldWidth;
+let fieldHeight;
     
 function infest() {
     boidField = document.getElementById("boid-field");
@@ -82,11 +85,11 @@ function loop() {
 }
 
 function createBoidBugObjects() {
-    const fieldWidth = boidField.clientWidth;
-    const fieldHeight = boidField.clientHeight;
+    fieldWidth = boidField.clientWidth;
+    fieldHeight = boidField.clientHeight;
 
-    for (let i = 0; i < 30; i++) {
-        boidBugs.push(new BoidBug(Math.random() * fieldWidth, Math.random() * fieldHeight));
+    for (let i = 0; i < 50; i++) {
+        boidBugs.push(new BoidBug(Math.random() * fieldWidth, Math.random() * fieldHeight, (2 * Math.random()) - 1, (2 * Math.random()) -1 ));
     }
 }
 
@@ -106,6 +109,7 @@ function moveBoidBugs() {
         alignmentVector = alignment(boidBug);
         separationVector = separation(boidBug);
         cohesionVector = cohesion(boidBug);
+        //findFoodVector = findFood(boidBug);
                 
         boidBug.vector = Vector.add(boidBug.vector, alignmentVector);
         boidBug.vector = Vector.add(boidBug.vector, cohesionVector);
@@ -128,7 +132,7 @@ function drawBoidBugs() {
 }
 
 function cohesion(bug) {
-    let cohesionVector = new Vector();    
+    let cohesionVector = new Vector();   
     boidBugs.forEach((boidBug) => {
         if (boidBug != bug) {
             cohesionVector = Vector.add(cohesionVector, boidBug.position);
@@ -136,7 +140,7 @@ function cohesion(bug) {
     })
     cohesionVector = Vector.divide(cohesionVector, boidBugs.length - 1);
     cohesionVector = Vector.subtract(cohesionVector, bug.position);
-    cohesionVector = Vector.divide(cohesionVector, 100);
+    cohesionVector = Vector.divide(cohesionVector, 200);
     return cohesionVector;
 }
 
@@ -144,12 +148,12 @@ function separation(bug) {
     let separationVector = new Vector();
     boidBugs.forEach((boidBug) => {
         if (boidBug != bug) {
-            let distanceBetween = Vector.subtract(bug.position, boidBug.position).getMagnitude();
-            if ( distanceBetween < 100) {
+            if ( Vector.subtract(bug.position, boidBug.position).getMagnitude() < 20) {
                 separationVector = Vector.subtract(separationVector, Vector.subtract(boidBug.position, bug.position));
             }
         }
     })
+    separationVector = Vector.divide(separationVector, 8);
     return separationVector;
 }
 

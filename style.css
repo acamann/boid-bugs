@@ -30,18 +30,19 @@ header {
     flex: 0 0 auto;
     padding: 12px;
     text-align: center;
+    border-bottom: solid 1px var(--dark);
 }
 main {
     flex: 1 0 auto;
     display: flex;
     flex-direction: column;
 }
-#controls {
+/* #controls {
     text-align: center;
     padding: 12px;
     flex: 0 0 auto;
     border-bottom: solid 1px var(--dark);
-}
+} */
 #boid-field {
     flex: 1 0 auto;
     background-image: url('img/backyard.jpeg');
