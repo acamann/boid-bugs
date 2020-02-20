@@ -7,18 +7,43 @@
 
 // start with 2d, then consider how to do 3d??
 
+
+// VECTOR OBJECT
+
 class Vector {
-    constructor(x, y) {
+    constructor(x = 0, y = 0) {
         this.x = x;
         this.y = y;
+    }
+
+    getOrientationInDegrees() {
+        return 90 + (Math.atan2(this.y, this.x) * 180 / Math.PI);
+    }
+
+    getMagnitude() {
+        return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2));
+    }
+
+    normalize() {
+        let magnitude = this.getMagnitude();
+        console.log(`(${this.x}, ${this.y}), Magnitude=${magnitude}`)
+        this.x /= magnitude;
+        this.y /= magnitude;
+    }
+
+    divideBy(divisor) {
+        this.x /= divisor;
+        this.y /= divisor;
     }
 
     static add(v1, v2) {
         return new Vector (v1.x + v2.x, v1.y + v2.y);
     }
-
-    getOrientationInDegrees() {
-        return 90 + (Math.atan2(this.y, this.x) * 180 / Math.PI);
+    static subtract(v1, v2) {
+        return new Vector (v1.x - v2.x, v1.y - v2.y);
+    }
+    static divide(v1, divisor) {
+        return new Vector (v1.x / divisor, v1.y / divisor);
     }
 }
 
@@ -26,39 +51,17 @@ class Vector {
 // BOIDBUG OBJECT
 class BoidBug {
 
-    // properties: position, velocity, orientation (velocity + orientation = Vector?)
-
-    constructor( x , y , v1 = (2 * Math.random()) - 1, v2 = (2 * Math.random() - 1) ) {
-        const speedFactor = 1.5;
+    constructor( x , y , v1 = 0, v2 = 0 ) {
         this.position = new Vector(x, y);
-        this.vector = new Vector(v1 * speedFactor, v2 * speedFactor);
-        this.orientation = (360 * Math.random(1)); // test rotation of items for now
+        this.vector = new Vector(v1, v2);
     }
-
-// input: neighboring bugs and their vectors
-
-// process following forces:
-//  alignment - move in similar direction of neighbors (take average of normalized vectors of neighbors)
-//  cohesion - move toward center of mass of neighbors (aim to average of current x, y values of neighbors)
-//  separation - 
-
-// maintain current vector with no neighbors
-//  other factors (variable speed, noise, obstacles(handled with separation))
-
-// ouput: new vector (x & y relative distances)
 
 }
 
 
-
-
 // BOID-ENGINE
 
-// array of boid-bugs
-// rendered & binded using D3?
-
 let boidBugs = [];
-let isActive = true;
 let boidField;
 const speedFactor = 0.001
     
@@ -69,10 +72,6 @@ function infest() {
     addBugElementsToField();
 
     requestAnimationFrame(loop);
-    //do {
-
-    //} while (isActive);
-
 }
 
 function loop() {
@@ -86,14 +85,13 @@ function createBoidBugObjects() {
     const fieldWidth = boidField.clientWidth;
     const fieldHeight = boidField.clientHeight;
 
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 30; i++) {
         boidBugs.push(new BoidBug(Math.random() * fieldWidth, Math.random() * fieldHeight));
     }
 }
 
 function addBugElementsToField() {
     boidBugs.forEach((boidBug, index) => {
-        console.log(boidBug.vector.getOrientationInDegrees());
         let boidElement = document.createElementNS("http://www.w3.org/2000/svg", "image");
         boidElement.setAttribute("id", `bug-${index}`);
         boidElement.setAttribute("href", "img/bug-solid.svg");
@@ -104,16 +102,19 @@ function addBugElementsToField() {
 }
 
 function moveBoidBugs() {
-    // Vector v1, v2, v3
-    // Boid b
-
     boidBugs.forEach(boidBug => {
-        //alignmentVector = alignment(boidBug);
-        //cohesionVector = cohesion(boidBug);
-        //separationVector = separation(boidBug);
+        alignmentVector = alignment(boidBug);
+        separationVector = separation(boidBug);
+        cohesionVector = cohesion(boidBug);
+                
+        boidBug.vector = Vector.add(boidBug.vector, alignmentVector);
+        boidBug.vector = Vector.add(boidBug.vector, cohesionVector);
+        boidBug.vector = Vector.add(boidBug.vector, separationVector);
 
-        //boidBug.vector = Vector.add(boidBug.boidbug.velocity + alignmentVector + cohesionVector + separationVector;
-        boidBug.position = Vector.add(boidBug.position, boidBug.vector)
+        //boidBug.vector.normalize();
+        //console.log(`${boidBug.vector.x}, ${boidBug.vector.y}`);
+
+        boidBug.position = Vector.add(boidBug.position, boidBug.vector);
     })
 }
 
@@ -126,3 +127,41 @@ function drawBoidBugs() {
     });
 }
 
+function cohesion(bug) {
+    let cohesionVector = new Vector();    
+    boidBugs.forEach((boidBug) => {
+        if (boidBug != bug) {
+            cohesionVector = Vector.add(cohesionVector, boidBug.position);
+        }
+    })
+    cohesionVector = Vector.divide(cohesionVector, boidBugs.length - 1);
+    cohesionVector = Vector.subtract(cohesionVector, bug.position);
+    cohesionVector = Vector.divide(cohesionVector, 100);
+    return cohesionVector;
+}
+
+function separation(bug) {
+    let separationVector = new Vector();
+    boidBugs.forEach((boidBug) => {
+        if (boidBug != bug) {
+            let distanceBetween = Vector.subtract(bug.position, boidBug.position).getMagnitude();
+            if ( distanceBetween < 100) {
+                separationVector = Vector.subtract(separationVector, Vector.subtract(boidBug.position, bug.position));
+            }
+        }
+    })
+    return separationVector;
+}
+
+function alignment(bug) {
+    let alignmentVector = new Vector();    
+    boidBugs.forEach((boidBug) => {
+        if (boidBug != bug) {
+            alignmentVector = Vector.subtract(alignmentVector, boidBug.vector);
+        }
+    })    
+    alignmentVector = Vector.divide(alignmentVector, boidBugs.length - 1);
+    alignmentVector = Vector.subtract(alignmentVector, bug.vector);
+    alignmentVector = Vector.divide(alignmentVector, 8);
+    return alignmentVector;
+}
