@@ -16,6 +16,10 @@ class Vector {
     static add(v1, v2) {
         return new Vector (v1.x + v2.x, v1.y + v2.y);
     }
+
+    getOrientationInDegrees() {
+        return 90 + (Math.atan2(this.y, this.x) * 180 / Math.PI);
+    }
 }
 
 
@@ -24,8 +28,8 @@ class BoidBug {
 
     // properties: position, velocity, orientation (velocity + orientation = Vector?)
 
-    constructor( x = Math.random(1), y = Math.random(1), v1 = (2 * Math.random()) - 1, v2 = (2 * Math.random() - 1) ) {
-        const speedFactor = 0.001
+    constructor( x , y , v1 = (2 * Math.random()) - 1, v2 = (2 * Math.random() - 1) ) {
+        const speedFactor = 1.5;
         this.position = new Vector(x, y);
         this.vector = new Vector(v1 * speedFactor, v2 * speedFactor);
         this.orientation = (360 * Math.random(1)); // test rotation of items for now
@@ -59,6 +63,8 @@ let boidField;
 const speedFactor = 0.001
     
 function infest() {
+    boidField = document.getElementById("boid-field");
+        
     createBoidBugObjects();
     addBugElementsToField();
 
@@ -77,15 +83,17 @@ function loop() {
 }
 
 function createBoidBugObjects() {
-    // set a random creator of all bugs
+    const fieldWidth = boidField.clientWidth;
+    const fieldHeight = boidField.clientHeight;
+
     for (let i = 0; i < 100; i++) {
-        boidBugs.push(new BoidBug());
+        boidBugs.push(new BoidBug(Math.random() * fieldWidth, Math.random() * fieldHeight));
     }
 }
 
 function addBugElementsToField() {
-    boidField = document.getElementById("boid-field");
     boidBugs.forEach((boidBug, index) => {
+        console.log(boidBug.vector.getOrientationInDegrees());
         let boidElement = document.createElementNS("http://www.w3.org/2000/svg", "image");
         boidElement.setAttribute("id", `bug-${index}`);
         boidElement.setAttribute("href", "img/bug-solid.svg");
@@ -110,13 +118,11 @@ function moveBoidBugs() {
 }
 
 function drawBoidBugs() {
-    const fieldWidth = boidField.clientWidth;
-    const fieldHeight = boidField.clientHeight;
     boidBugs.forEach((boidBug, index) => {
         let boidElement = document.getElementById(`bug-${index}`);
-        boidElement.setAttribute("x", boidBug.position.x * fieldWidth);
-        boidElement.setAttribute("y", boidBug.position.y * fieldHeight);
-        boidElement.setAttribute("transform", `rotate(${boidBug.orientation} ${boidBug.position.x * fieldWidth} ${boidBug.position.y * fieldHeight})`);
+        boidElement.setAttribute("x", boidBug.position.x);
+        boidElement.setAttribute("y", boidBug.position.y);
+        boidElement.setAttribute("transform", `rotate(${boidBug.vector.getOrientationInDegrees()} ${boidBug.position.x} ${boidBug.position.y})`);
     });
 }
 
