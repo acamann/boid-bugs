@@ -64,7 +64,6 @@ class BoidBug {
 
 let boidBugs = [];
 let boidField;
-const speedFactor = 0.001
 let fieldWidth;
 let fieldHeight;
     
@@ -98,8 +97,8 @@ function addBugElementsToField() {
         let boidElement = document.createElementNS("http://www.w3.org/2000/svg", "image");
         boidElement.setAttribute("id", `bug-${index}`);
         boidElement.setAttribute("href", "img/bug-solid.svg");
-        boidElement.setAttribute("width", "8px");
-        boidElement.setAttribute("height", "8px");
+        boidElement.setAttribute("width", "16px");
+        boidElement.setAttribute("height", "16px");
         boidField.append(boidElement);
     });
 }
