@@ -27,7 +27,6 @@ class Vector {
 
     normalize() {
         let magnitude = this.getMagnitude();
-        console.log(`(${this.x}, ${this.y}), Magnitude=${magnitude}`)
         this.x /= magnitude;
         this.y /= magnitude;
     }
@@ -77,6 +76,10 @@ function infest() {
     requestAnimationFrame(loop);
 }
 
+function resizeField() {
+
+}
+
 function loop() {
     drawBoidBugs();
     moveBoidBugs();
@@ -108,16 +111,16 @@ function moveBoidBugs() {
     boidBugs.forEach(boidBug => {
         alignmentVector = alignment(boidBug);
         separationVector = separation(boidBug);
-        cohesionVector = cohesion(boidBug);
+        //cohesionVector = cohesion(boidBug);
+        //avoidWallsVector = avoidWalls(boidBug);
         //findFoodVector = findFood(boidBug);
                 
         boidBug.vector = Vector.add(boidBug.vector, alignmentVector);
-        boidBug.vector = Vector.add(boidBug.vector, cohesionVector);
+        //boidBug.vector = Vector.add(boidBug.vector, cohesionVector);
         boidBug.vector = Vector.add(boidBug.vector, separationVector);
-
+        //boidBug.vector = Vector.add(boidBug.vector, avoidWallsVector);
+       
         //boidBug.vector.normalize();
-        //console.log(`${boidBug.vector.x}, ${boidBug.vector.y}`);
-
         boidBug.position = Vector.add(boidBug.position, boidBug.vector);
     })
 }
@@ -148,7 +151,7 @@ function separation(bug) {
     let separationVector = new Vector();
     boidBugs.forEach((boidBug) => {
         if (boidBug != bug) {
-            if ( Vector.subtract(bug.position, boidBug.position).getMagnitude() < 20) {
+            if ( Vector.subtract(bug.position, boidBug.position).getMagnitude() < 10) {
                 separationVector = Vector.subtract(separationVector, Vector.subtract(boidBug.position, bug.position));
             }
         }
@@ -168,4 +171,11 @@ function alignment(bug) {
     alignmentVector = Vector.subtract(alignmentVector, bug.vector);
     alignmentVector = Vector.divide(alignmentVector, 8);
     return alignmentVector;
+}
+
+function avoidWalls(bug) {
+    let avoidWallsVector = new Vector();    
+    avoidWallsVector = Vector.add(avoidWallsVector, new Vector(1 / (bug.position.x - fieldWidth + 1), 1 / (bug.position.y + 1)));
+    avoidWallsVector = Vector.add(avoidWallsVector, new Vector(1 / (bug.position.x + 1), 1 / (bug.position.y - fieldHeight + 1)));
+    return avoidWallsVector;
 }
