@@ -45,7 +45,7 @@ main {
 } */
 #boid-field {
     flex: 1 0 auto;
-    background-image: url('img/backyard.jpeg');
+    background-image: url('img/dirty-floor.jpg');
     background-repeat:no-repeat;
     background-size:cover;
 }
