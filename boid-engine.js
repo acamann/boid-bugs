@@ -27,9 +27,18 @@ class Vector {
 
     normalize() {
         let magnitude = this.getMagnitude();
-        console.log(`(${this.x}, ${this.y}), Magnitude=${magnitude}`)
         this.x /= magnitude;
         this.y /= magnitude;
+    }
+    
+    add(v2) {
+        this.x += v2.x;
+        this.y += v2.y;
+    }
+
+    subtract(v2) {
+        this.x -= v2.x;
+        this.y -= v2.y;
     }
 
     divideBy(divisor) {
@@ -37,9 +46,6 @@ class Vector {
         this.y /= divisor;
     }
 
-    static add(v1, v2) {
-        return new Vector (v1.x + v2.x, v1.y + v2.y);
-    }
     static subtract(v1, v2) {
         return new Vector (v1.x - v2.x, v1.y - v2.y);
     }
@@ -64,9 +70,13 @@ class BoidBug {
 
 let boidBugs = [];
 let boidField;
-const speedFactor = 0.001
 let fieldWidth;
 let fieldHeight;
+
+const speedFactor = 0.001;
+const COHESION_FACTOR = 200;
+const SEPARATION_FACTOR = 8;
+const ALIGNMENT_FACTOR = 8;
     
 function infest() {
     boidField = document.getElementById("boid-field");
@@ -75,6 +85,12 @@ function infest() {
     addBugElementsToField();
 
     requestAnimationFrame(loop);
+}
+
+function resize() {
+    boidField.innerHTML="";
+    boidBugs = [];
+    infest();
 }
 
 function loop() {
@@ -109,16 +125,12 @@ function moveBoidBugs() {
         alignmentVector = alignment(boidBug);
         separationVector = separation(boidBug);
         cohesionVector = cohesion(boidBug);
-        //findFoodVector = findFood(boidBug);
                 
-        boidBug.vector = Vector.add(boidBug.vector, alignmentVector);
-        boidBug.vector = Vector.add(boidBug.vector, cohesionVector);
-        boidBug.vector = Vector.add(boidBug.vector, separationVector);
+        boidBug.vector.add(alignmentVector); 
+        boidBug.vector.add(cohesionVector); 
+        boidBug.vector.add(separationVector);
 
-        //boidBug.vector.normalize();
-        //console.log(`${boidBug.vector.x}, ${boidBug.vector.y}`);
-
-        boidBug.position = Vector.add(boidBug.position, boidBug.vector);
+        boidBug.position.add(boidBug.vector);
     })
 }
 
@@ -135,12 +147,12 @@ function cohesion(bug) {
     let cohesionVector = new Vector();   
     boidBugs.forEach((boidBug) => {
         if (boidBug != bug) {
-            cohesionVector = Vector.add(cohesionVector, boidBug.position);
+            cohesionVector.add(boidBug.position);
         }
     })
-    cohesionVector = Vector.divide(cohesionVector, boidBugs.length - 1);
-    cohesionVector = Vector.subtract(cohesionVector, bug.position);
-    cohesionVector = Vector.divide(cohesionVector, 200);
+    cohesionVector.divideBy(boidBugs.length - 1);
+    cohesionVector.subtract(bug.position);
+    cohesionVector.divideBy(COHESION_FACTOR);
     return cohesionVector;
 }
 
@@ -149,11 +161,11 @@ function separation(bug) {
     boidBugs.forEach((boidBug) => {
         if (boidBug != bug) {
             if ( Vector.subtract(bug.position, boidBug.position).getMagnitude() < 20) {
-                separationVector = Vector.subtract(separationVector, Vector.subtract(boidBug.position, bug.position));
+                separationVector.subtract( Vector.subtract(boidBug.position, bug.position) );
             }
         }
     })
-    separationVector = Vector.divide(separationVector, 8);
+    separationVector.divideBy(SEPARATION_FACTOR);
     return separationVector;
 }
 
@@ -161,11 +173,11 @@ function alignment(bug) {
     let alignmentVector = new Vector();    
     boidBugs.forEach((boidBug) => {
         if (boidBug != bug) {
-            alignmentVector = Vector.subtract(alignmentVector, boidBug.vector);
+            alignmentVector.subtract(boidBug.vector);
         }
     })    
-    alignmentVector = Vector.divide(alignmentVector, boidBugs.length - 1);
-    alignmentVector = Vector.subtract(alignmentVector, bug.vector);
-    alignmentVector = Vector.divide(alignmentVector, 8);
+    alignmentVector.divideBy(boidBugs.length - 1);
+    alignmentVector.subtract(bug.vector);
+    alignmentVector.divideBy(ALIGNMENT_FACTOR);
     return alignmentVector;
 }
