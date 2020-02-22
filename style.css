@@ -37,12 +37,6 @@ main {
     display: flex;
     flex-direction: column;
 }
-/* #controls {
-    text-align: center;
-    padding: 12px;
-    flex: 0 0 auto;
-    border-bottom: solid 1px var(--dark);
-} */
 #boid-field {
     flex: 1 0 auto;
     background-image: url('img/dirty-floor.jpg');

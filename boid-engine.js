@@ -95,10 +95,9 @@ function infest() {
     requestAnimationFrame(loop);
 }
 
-function resize() {
-    boidField.innerHTML="";
-    boidBugs = [];
-    infest();
+function resize() {    
+    fieldWidth = boidField.clientWidth;
+    fieldHeight = boidField.clientHeight;
 }
 
 function loop() {
@@ -113,7 +112,10 @@ function createBoidBugObjects() {
     fieldHeight = boidField.clientHeight;
 
     for (let i = 0; i < 100; i++) {
-        boidBugs.push(new BoidBug(Math.random() * fieldWidth, Math.random() * fieldHeight, (2 * Math.random()) - 1, (2 * Math.random()) -1 ));
+        boidBugs.push(new BoidBug(Math.random() * fieldWidth, 
+                                  Math.random() * fieldHeight, 
+                                  (2 * Math.random()) - 1, 
+                                  (2 * Math.random()) -1 ));
     }
 }
 
@@ -152,7 +154,8 @@ function drawBoidBugs() {
         let boidElement = document.getElementById(`bug-${index}`);
         boidElement.setAttribute("x", boidBug.position.x);
         boidElement.setAttribute("y", boidBug.position.y);
-        boidElement.setAttribute("transform", `rotate(${boidBug.vector.getOrientationInDegrees()} ${boidBug.position.x} ${boidBug.position.y})`);
+        boidElement.setAttribute("transform", 
+                `rotate(${boidBug.vector.getOrientationInDegrees()} ${boidBug.position.x} ${boidBug.position.y})`);
     });
 }
 
@@ -182,7 +185,6 @@ function align(bug) {
         }
     })
     if (neighborCount > 0) alignmentVector.divideBy(neighborCount);
-    //alignmentVector.subtract(bug.vector);
     alignmentVector.multiplyBy(ALIGNMENT_FACTOR);
     return alignmentVector;
 }
