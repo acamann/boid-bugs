@@ -73,6 +73,7 @@ let boidBugs = [];
 let boidField;
 let fieldWidth;
 let fieldHeight;
+let crumbPosition;
 
 const AVOID_NEIGHBOR_DISTANCE = 25;
 const AVOIDANCE_FACTOR = 0.001;
@@ -84,6 +85,9 @@ const APPROACH_NEIGHBOR_DISTANCE = 200;
 const COHESION_FACTOR = 0.0001;
 
 const AVOID_WALL_FACTOR = 1.5;
+
+const FIND_FOOD_DISTANCE = 100;
+const FIND_FOOD_FACTOR = 0.001;
 
     
 function infest() {
@@ -98,6 +102,25 @@ function infest() {
 function resize() {    
     fieldWidth = boidField.clientWidth;
     fieldHeight = boidField.clientHeight;
+}
+
+function clickSVG(event) {
+    placeCrumbs(event.clientX, event.clientY);
+}
+
+function placeCrumbs(x, y) {
+    crumbPosition = new Vector(x, y);
+    let crumbs = document.getElementById("crumbs");
+    if (!crumbs) {
+        crumbs = document.createElementNS("http://www.w3.org/2000/svg", "image");
+        crumbs.setAttribute("id", `crumbs`);
+        crumbs.setAttribute("href", "img/foodscraps.png");
+        crumbs.setAttribute("width", "200px");
+        crumbs.setAttribute("height", "200px");
+        boidField.prepend(crumbs);
+    }
+    crumbs.setAttribute("x", x - 100 );
+    crumbs.setAttribute("y", y - 100 );
 }
 
 function loop() {
@@ -136,11 +159,14 @@ function moveBoidBugs() {
         let alignVector = align(boidBug);
         let approachVector = approach(boidBug);
         let avoidWallsVector = avoidWalls(boidBug);
+        let findFoodVector = findFood(boidBug);
+        
         
         boidBug.vector.add(avoidVector)
         boidBug.vector.add(alignVector)
         boidBug.vector.add(approachVector)
         boidBug.vector.add(avoidWallsVector);
+        boidBug.vector.add(findFoodVector);
         
         boidBug.vector.normalize();     
 
@@ -216,4 +242,15 @@ function avoidWalls(bug) {
     avoidWallsVector.multiplyBy(AVOID_WALL_FACTOR);
 
     return avoidWallsVector;
+}
+
+function findFood(bug) {
+    let findFoodVector = new Vector();
+    if (crumbPosition) {
+        if (Vector.distance(crumbPosition, bug.position) < FIND_FOOD_DISTANCE) {
+            findFoodVector.add(Vector.subtract(crumbPosition, bug.position));
+            findFoodVector.multiplyBy(FIND_FOOD_FACTOR); 
+        }  
+    }
+    return findFoodVector;
 }
